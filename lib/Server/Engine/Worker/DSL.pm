@@ -29,8 +29,8 @@ sub import {
     {
         no strict qw/refs/;
         *{"${caller}::worker"}            = $worker;
-        *{"${caller}::on_shutdown"}       = $shutdown;
-        *{"${caller}::on_force_shutdown"} = $force_shutdown;
+        *{"${caller}::on_shutdown"}       = $on_shutdown;
+        *{"${caller}::on_force_shutdown"} = $on_force_shutdown;
         *{"${caller}::instance"}          = $instance;
     }
 }
