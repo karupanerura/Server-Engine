@@ -1,0 +1,6 @@
+name = "Server-Engine"
+# badges = ["travis"]
+authority="cpan:KARUPA"
+
+module_maker="ModuleBuildTiny"
+
