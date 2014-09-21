@@ -52,6 +52,17 @@
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/karupanerura/Server-Engine/issues"
+      },
+      "homepage" : "https://github.com/karupanerura/Server-Engine",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/karupanerura/Server-Engine.git",
+         "web" : "https://github.com/karupanerura/Server-Engine"
+      }
+   },
    "version" : "0.01",
    "x_authority" : "cpan:KARUPA"
 }

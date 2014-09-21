@@ -11,7 +11,7 @@ Server::Engine - prefork server framework. (inspired by serverengine from rubyge
         max_workers               => 10,
         spawn_interval            => 1,
         graceful_shutdown_timeout => 30,
-        worker                    => MyWorker->new,
+        worker                    => MyWorker->instance,
     )->run;
 
 MyWorker:
