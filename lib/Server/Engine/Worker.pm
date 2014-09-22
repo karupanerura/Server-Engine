@@ -30,8 +30,12 @@ sub set_signal_handler {
     $SIG{$_} = 'IGNORE' for qw/INT/;
 
     my $handler = Server::Engine::SignalHandler->new;
-    $handler->register($_ => sub { $self->shutdown       }) for qw/TERM HUP/;
-    $handler->register($_ => sub { $self->force_shutdown }) for qw/ABRT/;
+    for my $sig (qw/TERM HUP/) {
+        $handler->register($sig => sub { $self->shutdown($sig) });
+    }
+    for my $sig (qw/ABRT/) {
+        $handler->register($sig => sub { $self->force_shutdown($sig) });
+    }
 
     return $handler;
 }
