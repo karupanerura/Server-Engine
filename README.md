@@ -7,6 +7,17 @@ Server::Engine - prefork server framework. (inspired by serverengine from rubyge
     use Server::Engine;
     use MyWorker;
 
+    my $worker = MyWorker->instance;
+    my $server = Server::Engine->new(
+        max_workers               => 10,
+        spawn_interval            => 1,
+        graceful_shutdown_timeout => 30,
+    );
+
+    $server->run($worker);
+    use Server::Engine;
+    use MyWorker;
+
     Server::Engine->new(
         max_workers               => 10,
         spawn_interval            => 1,
@@ -23,15 +34,21 @@ MyWorker:
     my $living = 1;
     worker {
         my $c = 0;
+        warn "[$$] START WORKER";
         while ($living) {
             warn "[$$] c: ", $c++;
         }
         continue {
-            safe_sleep 1;
+            safe_sleep $c;
         }
+        warn "[$$] SHUTDOWN WORKER";
     };
 
-    on_shutdown { $living = 0 };
+    on_shutdown {
+        my $sig = shift;
+        warn "[$$] SIG$sig recived.";
+        $living = 0;
+    };
 
     1;
 

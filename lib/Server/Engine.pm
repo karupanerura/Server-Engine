@@ -18,8 +18,6 @@ use Class::Accessor::Lite
           spawn_interval
           graceful_shutdown_timeout
         /,
-        # worker
-        qw/worker/,
         # callback
         qw/on_start on_reload on_force_reload on_shutdown on_force_shutdown on_fork on_leap/,
         # stat
@@ -27,17 +25,17 @@ use Class::Accessor::Lite
     ];
 
 sub run {
-    my $self = shift;
+    my ($self, $worker) = @_;
 
     $self->on_start->() if $self->on_start;
-    $self->_run();
+    $self->_run($worker);
     $self->on_shutdown->() if $self->on_shutdown;
 }
 
 sub _run {
-    my $self = shift;
+    my ($self, $worker) = @_;
     my $pm = $self->_create_parallel_prefork();
-    $self->start_workers($pm);
+    $self->start_workers($pm => $worker);
     $self->wait_workers($pm);
 }
 
@@ -67,14 +65,14 @@ sub _create_parallel_prefork {
 }
 
 sub start_workers {
-    my ($self, $pm) = @_;
+    my ($self, $pm, $worker) = @_;
 
     my $on_fork = $self->on_fork;
     local $SIG{ALRM} = $SIG{ALRM};
     until ($self->_check_signal($pm)) {
         $pm->start(sub {
             $on_fork->($$) if $on_fork;
-            $self->worker->run();
+            $worker->run();
         });
     }
 }
@@ -126,6 +124,17 @@ Server::Engine - prefork server framework. (inspired by serverengine from rubyge
     use Server::Engine;
     use MyWorker;
 
+    my $worker = MyWorker->instance;
+    my $server = Server::Engine->new(
+        max_workers               => 10,
+        spawn_interval            => 1,
+        graceful_shutdown_timeout => 30,
+    );
+
+    $server->run($worker);
+    use Server::Engine;
+    use MyWorker;
+
     Server::Engine->new(
         max_workers               => 10,
         spawn_interval            => 1,
@@ -142,15 +151,21 @@ MyWorker:
     my $living = 1;
     worker {
         my $c = 0;
+        warn "[$$] START WORKER";
         while ($living) {
             warn "[$$] c: ", $c++;
         }
         continue {
-            safe_sleep 1;
+            safe_sleep $c;
         }
+        warn "[$$] SHUTDOWN WORKER";
     };
 
-    on_shutdown { $living = 0 };
+    on_shutdown {
+        my $sig = shift;
+        warn "[$$] SIG$sig recived.";
+        $living = 0;
+    };
 
     1;
 
