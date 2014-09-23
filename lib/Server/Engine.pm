@@ -132,15 +132,6 @@ Server::Engine - prefork server framework. (inspired by serverengine from rubyge
     );
 
     $server->run($worker);
-    use Server::Engine;
-    use MyWorker;
-
-    Server::Engine->new(
-        max_workers               => 10,
-        spawn_interval            => 1,
-        graceful_shutdown_timeout => 30,
-        worker                    => MyWorker->instance,
-    )->run;
 
 MyWorker:
 
